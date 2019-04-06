@@ -1,0 +1,61 @@
+NAME
+    bibmod - Modify .bib files
+
+SYNOPSIS
+        perl bibmod.pl [bib_file ...] [-all] [-prf=file] [-verbose]
+                       [-nofm] [-nopause]
+
+DESCRIPTION
+        Designated .bib files are modified according to the predefined
+        modifier routines and/or user preferences.
+        Although any .bib file can be modified, this program can be
+        particularly useful for EndNote-exported .bib files,
+        where many strings needs be converted to TeX commands.
+
+OPTIONS
+        bib_file ...
+            .bib files to be modified.
+
+        -all (short form: -a)
+            All .bib files in the current working directory will be modified.
+
+        -prf=file
+            A user preferences file for string modifications.
+            String pairs contained in this file take precedence
+            over the predefined modifier routines.
+            A sample file is available showing for the syntax.
+
+        -verbose (short form: -verb)
+            Display the new lines of a bib file before its modifications.
+
+        -nofm
+            Do not show the front matter at the beginning of the program.
+
+        -nopause
+            Do not pause the shell at the end of the program.
+
+EXAMPLES
+        perl bibmod.pl molytech.bib -verbose
+        perl bibmod.pl molytech.bib murine.bib -prf=molytech.prf
+        perl bibmod.pl -all -nofm -nopause
+
+REQUIREMENTS
+    Perl 5
+
+SEE ALSO
+    bibmod on GitHub <https://github.com/jangcom/bibmod>
+
+CAVEAT
+    Please make sure that your .bib files are encoded in UTF-8; non-7-bit
+    characters will be corrupted otherwise.
+
+AUTHOR
+    Jaewoong Jang <jan9@korea.ac.kr>
+
+COPYRIGHT
+    Copyright (c) 2017-2019 Jaewoong Jang
+
+LICENSE
+    This software is available under the MIT license; the license
+    information is found in 'LICENSE'.
+
