@@ -41,7 +41,7 @@
     modifier routines and/or user preferences.
     Although any .bib file can be modified, this program can be
     particularly useful for EndNote-exported .bib files,
-    where many strings needs be converted to TeX commands.</code></pre>
+    where many strings need to be converted to LaTeX commands.</code></pre>
 
 <h1 id="OPTIONS">OPTIONS</h1>
 
