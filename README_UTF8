@@ -8,5 +8,5 @@ When a .bib file to be modified is not encoded in UTF-8,
 which can happen when a .bib file is exported from EndNote,
 the non-7-bit characters (such as Greek letters) will not be parsed correctly.
 Such a non-UTF-8 file can be recognized by broken letters
-at the beginning of the file and the perl executable complaining about
+at the beginning of the file and the Perl executable complaining about
 the printing (print or say).
