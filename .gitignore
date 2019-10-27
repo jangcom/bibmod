@@ -1,0 +1,18 @@
+# github archive
+github/
+
+# bibmod records
+bak_bibmod.pl/
+bibmod_baker.bat
+bak_sample.prf/
+sample_baker.bat
+updates.txt
+
+# MSWin link files
+*.lnk
+
+# POD-related
+bibmod_usage.bat
+bibmod.html
+pod2htmd.tmp
+bibmod_pod2html.bat

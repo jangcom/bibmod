@@ -2,7 +2,7 @@ NAME
     bibmod - Modify .bib files
 
 SYNOPSIS
-        perl bibmod.pl [bib_file ...] [-all] [-prf=file] [-verbose]
+        perl bibmod.pl [bib_file ...] [-all] [-prf=prf_file] [-verbose]
                        [-nofm] [-nopause]
 
 DESCRIPTION
@@ -10,7 +10,7 @@ DESCRIPTION
         modifier routines and/or user preferences.
         Although any .bib file can be modified, this program can be
         particularly useful for EndNote-exported .bib files,
-        where many strings needs be converted to TeX commands.
+        where many strings need to be converted to LaTeX commands.
 
 OPTIONS
         bib_file ...
@@ -19,11 +19,11 @@ OPTIONS
         -all (short form: -a)
             All .bib files in the current working directory will be modified.
 
-        -prf=file
+        -prf=prf_file
             A user preferences file for string modifications.
             String pairs contained in this file take precedence
             over the predefined modifier routines.
-            A sample file is available showing for the syntax.
+            Refer to the sample file 'sample.prf' for the syntax.
 
         -verbose (short form: -verb)
             Display the new lines of a bib file before its modifications.
@@ -42,15 +42,15 @@ EXAMPLES
 REQUIREMENTS
     Perl 5
 
+CAVEATS
+        Please make sure that your .bib files are encoded in UTF-8;
+        non-7-bit characters will be corrupted otherwise.
+
 SEE ALSO
     bibmod on GitHub <https://github.com/jangcom/bibmod>
 
-CAVEAT
-    Please make sure that your .bib files are encoded in UTF-8; non-7-bit
-    characters will be corrupted otherwise.
-
 AUTHOR
-    Jaewoong Jang <jan9@korea.ac.kr>
+    Jaewoong Jang <jangj@korea.ac.kr>
 
 COPYRIGHT
     Copyright (c) 2017-2019 Jaewoong Jang
