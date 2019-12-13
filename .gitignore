@@ -1,11 +1,10 @@
-# github archive
-github/
-
 # bibmod records
 bak_bibmod.pl/
-bibmod_baker.bat
 bak_sample.prf/
+bibmod_baker.bat
 sample_baker.bat
+
+# Updates
 updates.txt
 
 # MSWin link files
