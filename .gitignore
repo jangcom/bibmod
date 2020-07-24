@@ -1,17 +1,9 @@
-# bibmod records
-bak_bibmod.pl/
-bak_sample.prf/
+# .prf settings
+prf/sample_baker.bat
+prf/bak_sample.prf/
+
+# Misc.
 bibmod_baker.bat
-sample_baker.bat
-
-# Updates
-updates.txt
-
-# MSWin link files
+bak_bibmod.pl/
+docs/updates.txt
 *.lnk
-
-# POD-related
-bibmod_usage.bat
-bibmod.html
-pod2htmd.tmp
-bibmod_pod2html.bat

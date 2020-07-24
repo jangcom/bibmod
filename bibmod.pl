@@ -4,8 +4,7 @@ use warnings;
 use autodie;
 use utf8;
 use feature qw(say);
-use File::Basename qw(basename);
-use File::Copy qw(copy);
+use File::Basename qw(dirname basename);
 use List::Util qw(first);
 use Carp qw(croak);
 use DateTime;
@@ -14,15 +13,14 @@ use constant ARRAY  => ref [];
 use constant HASH   => ref {};
 
 
-our $VERSION = '2.02';
-our $LAST    = '2019-10-27';
+our $VERSION = '2.03';
+our $LAST    = '2020-07-24';
 our $FIRST   = '2017-06-07';
 
 
 #----------------------------------My::Toolset----------------------------------
 sub show_front_matter {
     # """Display the front matter."""
-
     my $prog_info_href = shift;
     my $sub_name = join('::', (caller(0))[0, 3]);
     croak "The 1st arg of [$sub_name] must be a hash ref!"
@@ -151,7 +149,6 @@ sub show_front_matter {
 
 sub validate_argv {
     # """Validate @ARGV against %cmd_opts."""
-
     my $argv_aref     = shift;
     my $cmd_opts_href = shift;
     my $sub_name = join('::', (caller(0))[0, 3]);
@@ -169,7 +166,7 @@ sub validate_argv {
     # Terminate the program if the number of required arguments passed
     # is not sufficient.
     #
-    my $argv_req_num = shift; # (OPTIONAL) Number of required args
+    my $argv_req_num = shift;  # (OPTIONAL) Number of required args
     if (defined $argv_req_num) {
         my $argv_req_num_passed = grep $_ !~ /-/, @$argv_aref;
         if ($argv_req_num_passed < $argv_req_num) {
@@ -225,12 +222,11 @@ sub validate_argv {
 
 sub show_elapsed_real_time {
     # """Show the elapsed real time."""
-
     my @opts = @_ if @_;
 
     # Parse optional arguments.
     my $is_return_copy = 0;
-    my @del; # Garbage can
+    my @del;  # Garbage can
     foreach (@opts) {
         if (/copy/i) {
             $is_return_copy = 1;
@@ -261,7 +257,6 @@ sub show_elapsed_real_time {
 
 sub pause_shell {
     # """Pause the shell."""
-
     my $notif = $_[0] ? $_[0] : "Press enter to exit...";
 
     print $notif;
@@ -273,7 +268,6 @@ sub pause_shell {
 
 sub construct_timestamps {
     # """Construct timestamps."""
-
     # Optional setting for the date component separator
     my $date_sep  = '';
 
@@ -294,7 +288,7 @@ sub construct_timestamps {
     (my $hm = $hms) =~ s/[0-9]{2}$//;
 
     my %datetimes = (
-        none   => '', # Used for timestamp suppressing
+        none   => '',  # Used for timestamp suppressing
         ymd    => $ymd,
         hms    => $hms,
         hm     => $hm,
@@ -308,7 +302,6 @@ sub construct_timestamps {
 
 sub rm_duplicates {
     # """Remove duplicate items from an array."""
-
     my $aref = shift;
     my $sub_name = join('::', (caller(0))[0, 3]);
     croak "The 1st arg of [$sub_name] must be an array ref!"
@@ -325,21 +318,21 @@ sub rm_duplicates {
 
 sub parse_argv {
     # """@ARGV parser"""
-
     my(
         $argv_aref,
         $cmd_opts_href,
         $run_opts_href,
     ) = @_;
-    my %cmd_opts = %$cmd_opts_href; # For regexes
+    my %cmd_opts = %$cmd_opts_href;  # For regexes
 
     # Parser: Overwrite default run options if requested by the user.
+    my $cmd_arg_field_sep = ',';
     foreach (@$argv_aref) {
         # .bib files
         push @{$run_opts_href->{bib_files}}, $_ if (
             /[.]bib$/i
             and -e
-            and not -d # Added not to read in dirs having .bib in their names
+            and not -d  # Added not to read in dirs having .bib in their names
         );
 
         # All .bib files in the current working directory
@@ -347,6 +340,12 @@ sub parse_argv {
             # Modified not to read in directories
             # having .bib in their names
             @{$run_opts_href->{bib_files}} = grep { not -d } glob '*.bib';
+        }
+
+        # Output filename flag
+        if (/$cmd_opts{out_flag}/i) {
+            s/$cmd_opts{out_flag}//i;
+            $run_opts_href->{out_flag} = $_;
         }
 
         # Verbose
@@ -361,6 +360,14 @@ sub parse_argv {
             if (not -e) {
                 print "User preferences file [$_] NOT found in the CWD.";
                 print " Default preferences will be used.\n\n";
+            }
+        }
+
+        # Toggles of the modifier routines
+        foreach my $toggle (qw/turn_on turn_off/) {
+            if (/$cmd_opts{$toggle}/i) {
+                s/$cmd_opts{$toggle}//i;
+                @{$run_opts_href->{$toggle}} = split /$cmd_arg_field_sep/;
             }
         }
 
@@ -382,7 +389,6 @@ sub parse_argv {
 
 sub read_in_prf {
     # """Read in the user preferences."""
-
     my(
         $run_opts_href,
         $old_and_new_href,
@@ -398,11 +404,11 @@ sub read_in_prf {
         next if not /$prf_sep/;
 
         my($old, $new) = (split /\s*$prf_sep\s*/)[0, 1];
-        $new =~ s/\s*#.*//; # Suppress an inline comment.
+        $new =~ s/\s*#.*//;  # Suppress an inline comment.
         $old_and_new_href->{$old} = $new;
     }
     close $prf_fh;
-    print "\n[$prf] has been read in.\n\n";
+    print "\n[$prf] read in.\n\n";
 
     return;
 }
@@ -410,7 +416,6 @@ sub read_in_prf {
 
 sub enclose_with_braces {
     # """Enclose strings with pairs of braces (curly brackets)."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -461,7 +466,7 @@ sub enclose_with_braces {
             qr/[mkMTG]eV/,
             qr/[mkMTG]Bq/,
         );
-        my @proper_nouns = ( # Those not captured by as an all-cap string
+        my @proper_nouns = (  # Those not captured by as an all-cap string
             # General
             qr/[1-3]D/,
 
@@ -572,9 +577,9 @@ sub enclose_with_braces {
 
         # (4) Reconstruct the field value.
         my $_reconstructed;
-        $_reconstructed .= $_ for @_decomposed{
+        $_reconstructed .= $_ for @_decomposed {
             'field_val_bef',
-            'field_val_mid', # The one that modified
+            'field_val_mid',  # The one that modified
             'field_val_aft',
         };
         $field_val = $_reconstructed;
@@ -589,7 +594,6 @@ sub enclose_with_braces {
 
 sub subscript_molecules {
     # """Subscript the number of constituent atoms of molecules."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -630,7 +634,6 @@ sub subscript_molecules {
 
 sub superscript_isotopes {
     # """Superscript the mass numbers of isotopes."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -670,7 +673,6 @@ sub superscript_isotopes {
 
 sub greeks_to_tex_cmds {
     # """Convert Greek letters to TeX commands."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -719,7 +721,6 @@ sub greeks_to_tex_cmds {
 
 sub accented_to_tex_syntaxes {
     # """Convert accented strings to TeX syntaxes using ligatures."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -766,7 +767,6 @@ sub accented_to_tex_syntaxes {
 
 sub to_url_underscores {
     # """Convert underscores to TeX-parsable ones for the URL entry field."""
-
     my($field_key, $field_val) = @_;
 
     # Entry field designator
@@ -785,17 +785,37 @@ sub to_url_underscores {
 }
 
 
+sub rm_periods_from_journal {
+    # """Remove periods from the journal and shortjournal fields."""
+    my($field_key, $field_val) = @_;
+
+    # Entry field designator
+    my @fields_of_int = qw/
+        journal
+        shortjournal
+    /;
+    return unless first { $field_key =~ /\s*\b$_/i } @fields_of_int;
+
+    # Remove periods.
+    $field_val =~ s/[.]//g;
+
+    # Assign the modified field value.
+    $_[1] = $field_val;
+
+    return;
+}
+
+
 sub to_tex_symbs {
     # """Convert symbols to TeX commands."""
-
     my($field_key, $field_val) = @_;
 
     # To TeX commands
     my %symbs = (
         '’' => "'",
         '“' => '"',
-        '−' => '{\textendash}', # endash 1
-        '–' => '{\textendash}', # endash 2
+        '−' => '{\textendash}',  # endash 1
+        '–' => '{\textendash}',  # endash 2
         '—' => '{\textemdash}',
         '™' => '{\texttrademark}',
         '®' => '{\textregistered}',
@@ -810,8 +830,7 @@ sub to_tex_symbs {
 
 
 sub modify_bib {
-    # """Modify .bib files."""
-
+    # """Modify .bib fields for BibTeX/BibLaTeX."""
     my $run_opts_href = shift;
 
     # Exceptions and user preferences
@@ -833,16 +852,60 @@ sub modify_bib {
     say "[$_]" for @{$run_opts_href->{bib_files}};
     say "-" x 70;
 
-    # Code refs of predefined modifier routines
-    my @modifier_crefs = (
-        \&enclose_with_braces,
-        \&subscript_molecules,
-        \&superscript_isotopes,
-        \&greeks_to_tex_cmds,
-        \&accented_to_tex_syntaxes,
-#        \&to_url_underscores,
-        \&to_tex_symbs, # Place it at the end.
+    # Predefined modifier routines
+    my %modifier_routines_opt = (
+        enclose_with_braces => {
+            cref   => \&enclose_with_braces,
+            toggle => 1,
+        },
+        subscript_molecules => {
+            cref   => \&subscript_molecules,
+            toggle => 1,
+        },
+        superscript_isotopes => {
+            cref   => \&superscript_isotopes,
+            toggle => 1,
+        },
+        greeks_to_tex_cmds => {
+            cref   => \&greeks_to_tex_cmds,
+            toggle => 1,
+        },
+        accented_to_tex_syntaxes => {
+            cref   => \&accented_to_tex_syntaxes,
+            toggle => 1,
+        },
+        to_url_underscores => {
+            cref   => \&to_url_underscores,
+            toggle => 0,  # Prone to induce BibTeX/BibLaTeX errors
+        },
+        rm_periods_from_journal => {
+            cref   => \&rm_periods_from_journal,
+            toggle => 0,
+        },
+        to_tex_symbs => {  # Must be placed here (at the end)
+            cref   => \&to_tex_symbs,
+            toggle => 1,
+        },
     );
+    # The order matters: "to_tex_symbs" must be placed at the end.
+    my @modifier_routines = qw/
+        enclose_with_braces
+        subscript_molecules
+        superscript_isotopes
+        greeks_to_tex_cmds
+        accented_to_tex_syntaxes
+        to_url_underscores
+        rm_periods_from_journal
+        to_tex_symbs
+    /;
+    foreach (@{$run_opts_href->{turn_on}}) {
+        $modifier_routines_opt{$_}{toggle} = 1
+            if exists $modifier_routines_opt{$_};
+    }
+    foreach (@{$run_opts_href->{turn_off}}) {
+        $modifier_routines_opt{$_}{toggle} = 0
+            if exists $modifier_routines_opt{$_};
+    }
 
     # Work on the .bib files.
     my $yn     = undef;
@@ -852,7 +915,7 @@ sub modify_bib {
         open my $bib_fh, '<:encoding(UTF-8)', $bib;
         foreach my $line (<$bib_fh>) {
             chomp($line);
-            if ($line =~ /=/) { # Works only on entry fields
+            if ($line =~ /=/) {  # Works only on entry fields
                 # (1) Decompose an entry field into its key and value.
                 # - regex is used instead of split because some entry fields
                 #   like url contain the equals sign (=).
@@ -878,15 +941,18 @@ sub modify_bib {
                 # (3) Secondary modifications
                 # - Intended for general modifications
                 # - Predefined modifier routines
-                $_->($decomposed{field_key}, $decomposed{field_val})
-                    for @modifier_crefs;
+                foreach (@modifier_routines) {
+                    next if not $modifier_routines_opt{$_}{toggle};
+                    my $cref = $modifier_routines_opt{$_}{cref};
+                    $cref->($decomposed{field_key}, $decomposed{field_val});
+                }
 
                 # (4) Reconstruct the entry field.
                 my $reconstructed;
-                $reconstructed .= $_ for @decomposed{
+                $reconstructed .= $_ for @decomposed {
                     'field_key',
                     'field_sep',
-                    'field_val', # The one that modified
+                    'field_val',  # The one that modified
                 };
                 $line = $reconstructed;
             };
@@ -898,11 +964,14 @@ sub modify_bib {
 
         # Verbose option
         if ($run_opts_href->{is_verbose}) {
+            say "-" x 70;
+            say "\nThe new lines will be:\n";
+            say "-" x 70;
             say for @the_modified;
             say "-" x 70;
         }
 
-        # Timestamp
+        # Timestamping on the output .bib file
         my %datetimes = construct_timestamps('-');
         my $tstamp = sprintf(
             "\@comment\{Modified by %s at %s\}",
@@ -910,7 +979,7 @@ sub modify_bib {
             $datetimes{ymdhms},
         );
         if ($the_modified[0] =~ /\@comment/) {
-            $the_modified[0] = $tstamp; # Overwriting
+            $the_modified[0] = $tstamp;  # Overwriting
         }
 
         # yn prompt
@@ -922,16 +991,26 @@ sub modify_bib {
                 print $yn_msg;
             }
         }
-        # Below works only if $yn == 'y'.
-        my $temp = 'temp';
-        open my $temp_fh, '>:encoding(UTF-8)', 'temp';
+
+        # Write the new lines to an output file.
+        my $dname = dirname($bib);
+        my $patt = qr/(.*)[.]([a-zA-Z]+$)/;
+        (my $bname = basename($bib)) =~ s/$patt/$1/;
+        (my $ext = basename($bib)) =~ s/$patt/$2/;
+        my $bib_out = sprintf(
+            "%s/%s%s.%s",
+            $dname,
+            $bname,
+            $run_opts_href->{out_flag},
+            $ext,
+        );
+        open my $bib_out_fh, '>:encoding(UTF-8)', $bib_out;
         if (not $the_modified[0] =~ /\@comment/) {
-            say $temp_fh "$tstamp\n";
+            say $bib_out_fh "$tstamp\n";
         }
-        say $temp_fh $_ for @the_modified;
-        close $temp_fh;
-        copy($temp, $bib);
-        unlink $temp;
+        say $bib_out_fh $_ for @the_modified;
+        close $bib_out_fh;
+        say "[$bib_out] generated.";
     }
 
     return;
@@ -940,11 +1019,10 @@ sub modify_bib {
 
 sub bibmod {
     # """bibmod main routine"""
-
     if (@ARGV) {
         my %prog_info = (
             titl       => basename($0, '.pl'),
-            expl       => 'Modify .bib files',
+            expl       => 'Modify .bib fields for BibTeX/BibLaTeX',
             vers       => $VERSION,
             date_last  => $LAST,
             date_first => $FIRST,
@@ -955,17 +1033,23 @@ sub bibmod {
                 mail => 'jangj@korea.ac.kr',
             },
         );
-        my %cmd_opts = ( # Command-line opts
-            bib_all => qr/-?-a(?:ll)?\b/i,
-            prf     => qr/-?-prf\s*=\s*/i,
-            verbose => qr/-?-verb(?:ose)?\b/i,
-            nofm    => qr/-?-nofm\b/i,
-            nopause => qr/-?-nopause\b/i,
+        my %cmd_opts = (  # Command-line opts
+            bib_all  => qr/-?-a(?:ll)?\b/i,
+            prf      => qr/-?-prf\s*=\s*/i,
+            out_flag => qr/-?-(?:out_)?flag\s*=\s*/i,
+            verbose  => qr/-?-v(?:erbose)?\b/i,
+            turn_on  => qr/-?-(?:turn_)?on\s*=\s*/i,
+            turn_off => qr/-?-(?:turn_)?off\s*=\s*/i,
+            nofm     => qr/-?-nofm\b/i,
+            nopause  => qr/-?-nopause\b/i,
         );
-        my %run_opts = ( # Program run opts
+        my %run_opts = (  # Program run opts
             bib_files  => [],
             prf        => '',
+            out_flag   => '',
             prf_sep    => '=>',
+            turn_on    => [],
+            turn_off   => [],
             is_nofm    => 0,
             is_nopause => 0,
         );
@@ -998,12 +1082,14 @@ __END__
 
 =head1 NAME
 
-bibmod - Modify .bib files
+bibmod - Modify .bib fields for BibTeX/BibLaTeX
 
 =head1 SYNOPSIS
 
-    perl bibmod.pl [bib_file ...] [-all] [-prf=prf_file] [-verbose]
-                   [-nofm] [-nopause]
+    perl bibmod.pl [bib_file ...] [--all] [--prf=prf_file]
+                   [--out_flag=flag] [--verbose]
+                   [--turn_on=routine ...] [--turn_off=routine ...]
+                   [--nofm] [--nopause]
 
 =head1 DESCRIPTION
 
@@ -1018,29 +1104,44 @@ bibmod - Modify .bib files
     bib_file ...
         .bib files to be modified.
 
-    -all (short form: -a)
+    --all (short form: -a)
         All .bib files in the current working directory will be modified.
 
-    -prf=prf_file
+    --prf=prf_file
         A user preferences file for string modifications.
         String pairs contained in this file take precedence
         over the predefined modifier routines.
         Refer to the sample file 'sample.prf' for the syntax.
 
-    -verbose (short form: -verb)
+    --out_flag=flag (short form: --flag, default: empty)
+        A string to be appended to the names of modified .bib files.
+
+    --verbose (short form: -v)
         Display the new lines of a bib file before its modifications.
 
-    -nofm
+    --turn_on=routine ... (short form: -off)
+    --turn_off=routine ... (short form: -off)
+        The following modifier routines can be toggled on or off.
+            enclose_with_braces      (default: on)
+            subscript_molecules      (default: on)
+            superscript_isotopes     (default: on)
+            greeks_to_tex_cmds       (default: on)
+            accented_to_tex_syntaxes (default: on)
+            to_url_underscores       (default: off)
+            rm_periods_from_journal  (default: off)
+            to_tex_symbs             (default: on)
+
+    --nofm
         Do not show the front matter at the beginning of the program.
 
-    -nopause
+    --nopause
         Do not pause the shell at the end of the program.
 
 =head1 EXAMPLES
 
-    perl bibmod.pl molytech.bib -verbose
-    perl bibmod.pl molytech.bib murine.bib -prf=molytech.prf
-    perl bibmod.pl -all -nofm -nopause
+    perl bibmod.pl molytech.bib --v
+    perl bibmod.pl molytech.bib murine.bib --prf=molytech.prf
+    perl bibmod.pl --all --nofm --on=rm_periods_from_journal
 
 =head1 REQUIREMENTS
 
@@ -1061,7 +1162,7 @@ Jaewoong Jang <jangj@korea.ac.kr>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2017-2019 Jaewoong Jang
+Copyright (c) 2017-2020 Jaewoong Jang
 
 =head1 LICENSE
 
