@@ -1,0 +1,78 @@
+NAME
+    bibmod - Modify .bib fields for BibTeX/BibLaTeX
+
+SYNOPSIS
+        perl bibmod.pl [bib_file ...] [--all] [--prf=prf_file]
+                       [--out_flag=flag] [--verbose]
+                       [--turn_on=routine ...] [--turn_off=routine ...]
+                       [--nofm] [--nopause]
+
+DESCRIPTION
+        Designated .bib files are modified according to the predefined
+        modifier routines and/or user preferences.
+        Although any .bib file can be modified, this program can be
+        particularly useful for EndNote-exported .bib files,
+        where many strings need to be converted to LaTeX commands.
+
+OPTIONS
+        bib_file ...
+            .bib files to be modified.
+
+        --all (short form: -a)
+            All .bib files in the current working directory will be modified.
+
+        --prf=prf_file
+            A user preferences file for string modifications.
+            String pairs contained in this file take precedence
+            over the predefined modifier routines.
+            Refer to the sample file 'sample.prf' for the syntax.
+
+        --out_flag=flag (short form: --flag, default: empty)
+            A string to be appended to the names of modified .bib files.
+
+        --verbose (short form: -v)
+            Display the new lines of a bib file before its modifications.
+
+        --turn_on=routine ... (short form: -off)
+        --turn_off=routine ... (short form: -off)
+            The following modifier routines can be toggled on or off.
+                enclose_with_braces      (default: on)
+                subscript_molecules      (default: on)
+                superscript_isotopes     (default: on)
+                greeks_to_tex_cmds       (default: on)
+                accented_to_tex_syntaxes (default: on)
+                to_url_underscores       (default: off)
+                rm_periods_from_journal  (default: off)
+                to_tex_symbs             (default: on)
+
+        --nofm
+            Do not show the front matter at the beginning of the program.
+
+        --nopause
+            Do not pause the shell at the end of the program.
+
+EXAMPLES
+        perl bibmod.pl molytech.bib --v
+        perl bibmod.pl molytech.bib murine.bib --prf=molytech.prf
+        perl bibmod.pl --all --nofm --on=rm_periods_from_journal
+
+REQUIREMENTS
+    Perl 5
+
+CAVEATS
+        Please make sure that your .bib files are encoded in UTF-8;
+        non-7-bit characters will be corrupted otherwise.
+
+SEE ALSO
+    bibmod on GitHub <https://github.com/jangcom/bibmod>
+
+AUTHOR
+    Jaewoong Jang <jangj@korea.ac.kr>
+
+COPYRIGHT
+    Copyright (c) 2017-2020 Jaewoong Jang
+
+LICENSE
+    This software is available under the MIT license; the license
+    information is found in 'LICENSE'.
+

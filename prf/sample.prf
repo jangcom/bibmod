@@ -1,0 +1,54 @@
+#
+# User preferences file for bibmod
+# J. Jang
+# Last:  2019-02-23
+# First: 2019-02-23
+#
+# - Syntax: old_word => new_word
+# - The hash (#) is used for commenting.
+# - Word pairs specified here will take precedence if conflicted with
+#   the modifier routines predefined in the source code.
+#   While this provides the user with more control, which is the very purpose
+#   of this file, inconsistent modifications can be made if the user does not
+#   know which words will be modified by the modifier routines.
+#   For example, the isotopes() routine will act on an isotope string as
+#     - 99Mo  => $^{99}$
+#     - 99mTc => $^{99\text{m}}$Tc
+#   If the following partial (incomplete) user preference is specified,
+#     - 99Mo => \textsuperscript{99}Mo
+#   the following will result:
+#   title = {something.. \textsuperscript{99}Mo/$^{99\text{m}}$Tc}
+#   The Bib(La)TeX will not complain, but this is aesthetically unpleasing
+#   and the output strings in the compiled document may be different
+#   from your expectation.
+# - Also note that the word pairs here are applied to all the entries;
+#   be careful not to modify author's name or the URL.
+#
+
+#------------------------------------------------------------------------------
+# Isotopes: \text.. style (predefined routine uses $^{..}$ style)
+#------------------------------------------------------------------------------
+98Mo  => \textsuperscript{98}Mo
+99Mo  => \textsuperscript{99}Mo
+100Mo => \textsuperscript{100}Mo
+99mTc => \textsuperscript{99m}Tc
+99gTc => \textsuperscript{99g}Tc
+99Tc  => \textsuperscript{99}Tc
+
+#------------------------------------------------------------------------------
+# Isotopes: Nongeneral
+#------------------------------------------------------------------------------
+natC => \textsuperscript{nat}C
+
+#------------------------------------------------------------------------------
+# Compounds: \text.. style (predefined routine uses $_{..}$ style)
+#------------------------------------------------------------------------------
+MoO3 => MoO\textsubscript{3}
+
+#------------------------------------------------------------------------------
+# Misc.
+#------------------------------------------------------------------------------
+Oak Ridge National Laboratory => {Oak Ridge National Laboratory}
+Liège => {L}i\`{e}ge
+
+#eof

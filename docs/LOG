@@ -1,0 +1,31 @@
+2020-07-24 (v2.03)
+- A flag can now be appended to the output filenames via the command-line
+  argument "--out_flag=flag".
+- The modifier routines can now be toggled on or off via the command-line
+  arguments "--turn_on=routine ..." and "--turn_off=routine ...".
+- A modifier routine "rm_periods_from_journal()" has been added.
+- The directory structure has been reorganized.
+
+2019-05-06 (v2.02)
+- The routine "modify_bib()" is not entered if no .bib file is found.
+
+2019-05-06 (v2.02)
+- The modifier routine "enclose_with_braces()" has been modified:
+  - Several chemical elements have been added.
+  - Some programs have been added to be \textsc or \texttt.
+  - The first character following a dash (-), in addition to a colon (:),
+    is enclosed with braces.
+  - bibmod will no longer try to open a directory having '.bib' in its name.
+
+2019-04-07 (v2.01)
+- Source code reorganized
+
+2019-02-23 (v2.00)
+- Source code reorganized
+- Program name changed: bibed.pl -> bibmod.pl
+
+2017-08-28 (v1.00)
+- Program name changed: bib.pl -> bibed.pl
+
+2017-06-07 (v1.00)
+- First written bib.pl
