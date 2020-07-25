@@ -14,7 +14,7 @@ use constant HASH   => ref {};
 
 
 our $VERSION = '2.03';
-our $LAST    = '2020-07-24';
+our $LAST    = '2020-07-25';
 our $FIRST   = '2017-06-07';
 
 
@@ -887,7 +887,17 @@ sub modify_bib {
             toggle => 1,
         },
     );
-    # The order matters: "to_tex_symbs" must be placed at the end.
+    foreach (@{$run_opts_href->{turn_on}}) {
+        $modifier_routines_opt{$_}{toggle} = 1
+            if exists $modifier_routines_opt{$_};
+    }
+    foreach (@{$run_opts_href->{turn_off}}) {
+        $modifier_routines_opt{$_}{toggle} = 0
+            if exists $modifier_routines_opt{$_};
+    }
+    # Keys of the %modifier_routines_opt hash
+    # > The order matters: "to_tex_symbs" must be placed at the end.
+    # > Skipped from iteration if the "toggle" subkey is false.
     my @modifier_routines = qw/
         enclose_with_braces
         subscript_molecules
@@ -898,14 +908,6 @@ sub modify_bib {
         rm_periods_from_journal
         to_tex_symbs
     /;
-    foreach (@{$run_opts_href->{turn_on}}) {
-        $modifier_routines_opt{$_}{toggle} = 1
-            if exists $modifier_routines_opt{$_};
-    }
-    foreach (@{$run_opts_href->{turn_off}}) {
-        $modifier_routines_opt{$_}{toggle} = 0
-            if exists $modifier_routines_opt{$_};
-    }
 
     # Work on the .bib files.
     my $yn     = undef;
